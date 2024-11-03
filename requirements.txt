@@ -1,4 +1,4 @@
-https://huggingface.co/csukuangfj/sherpa-onnx-wheels/resolve/main/cpu/1.10.20/sherpa_onnx-1.10.20-cp38-cp38-manylinux_2_17_x86_64.manylinux2014_x86_64.whl
-#sherpa-onnx>=1.10.16
+#https://huggingface.co/csukuangfj/sherpa-onnx-wheels/resolve/main/cpu/1.10.20/sherpa_onnx-1.10.20-cp38-cp38-manylinux_2_17_x86_64.manylinux2014_x86_64.whl
+sherpa-onnx>=1.10.16
 
 soundfile
