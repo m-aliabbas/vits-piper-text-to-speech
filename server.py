@@ -6,29 +6,44 @@ import uuid
 import os
 import time
 
-from model import get_pretrained_model, friendly_model_names,get_available_speakers
+from model import get_pretrained_model, friendly_model_names, get_available_speakers
 
-app = FastAPI(title="OpenAI-Compatible Sherpa TTS")
+app = FastAPI(title="OpenAI-Compatible Sherpa Piper TTS")
 
 
 class OpenAITTSRequest(BaseModel):
-    model: str  # e.g., "tts-1"
-    input: str
-    voice: str  # e.g., "alan_medium"
-    speed: float = 1.0
+    model: str  # OpenAI-style model field (ignored internally)
+    input: str  # Text to synthesize
+    voice: str  # Friendly name like "alan_medium"
+    speed: float = 1.0  # Speech speed factor
 
 
-@app.get("/")
+@app.get("/", summary="API Info", tags=["General"])
 def index():
+    """
+    Returns a basic welcome message and available voice list.
+    """
     return {
-        "message": "OpenAI-compatible TTS server is running.",
+        "message": "OpenAI-compatible Piper TTS server is running.",
         "example_endpoint": "/v1/audio/speech",
         "available_voices": list(friendly_model_names.keys()),
     }
 
 
-@app.post("/v1/audio/speech")
+@app.post("/v1/audio/speech", summary="Synthesize Speech", tags=["Speech"])
 def tts_openai_format(req: OpenAITTSRequest):
+    """
+    Convert input text to speech using the selected Piper voice.
+
+    Request Body:
+    - model: Just use "tts-1"
+    - input: The text to synthesize
+    - voice: Voice ID (see /v1/voices)
+    - speed: Optional speed factor (default = 1.0)
+
+    Returns:
+    - audio/wav file containing generated speech
+    """
     try:
         voice = req.voice.strip()
 
@@ -39,7 +54,7 @@ def tts_openai_format(req: OpenAITTSRequest):
         tts = get_pretrained_model(repo_id, req.speed)
 
         start = time.time()
-        audio = tts.generate(req.input, sid=0)  # speaker_id=0 by default
+        audio = tts.generate(req.input, sid=0)
         end = time.time()
 
         if len(audio.samples) == 0:
@@ -64,22 +79,31 @@ def tts_openai_format(req: OpenAITTSRequest):
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
-@app.get("/v1/voices")
+
+@app.get("/v1/voices", summary="List Available Voices", tags=["Voices"])
 def get_available_voices():
     """
-    Returns a list of available voices.
+    Returns a list of all available friendly voice names.
+    Use these as `voice` in `/v1/audio/speech`.
     """
     return {
         "voices": list(friendly_model_names.keys())
     }
-@app.get("/v1/voices/{voice_id}/speakers")
+
+
+@app.get("/v1/voices/{voice_id}/speakers", summary="Get Number of Speakers", tags=["Voices"])
 def get_speakers(voice_id: str):
     """
-    Returns a list of available speakers for a given voice.
+    Returns the number of available speakers for a given voice.
+
+    Path Param:
+    - voice_id: One of the voice names from `/v1/voices`
+
+    Returns:
+    - Number of supported speakers
     """
     try:
         speakers = get_available_speakers(voice_id)
         return {"num_speakers": speakers}
     except ValueError as e:
         raise HTTPException(status_code=404, detail=str(e))
-        return {"num_speakers": 1} 
