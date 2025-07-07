@@ -264,4 +264,4 @@ if __name__ == "__main__":
     download_espeak_ng_data()
     formatter = "%(asctime)s %(levelname)s [%(filename)s:%(lineno)d] %(message)s"
 
-    demo.launch()
+    demo.launch(share=True)
