@@ -6,7 +6,7 @@ import uuid
 import os
 import time
 
-from model import get_pretrained_model, friendly_model_names
+from model import get_pretrained_model, friendly_model_names,get_available_speakers
 
 app = FastAPI(title="OpenAI-Compatible Sherpa TTS")
 
@@ -23,7 +23,7 @@ def index():
     return {
         "message": "OpenAI-compatible TTS server is running.",
         "example_endpoint": "/v1/audio/speech",
-        "available_voices": list(friendly_model_names.keys())
+        "available_voices": list(friendly_model_names.keys()),
     }
 
 
@@ -63,3 +63,23 @@ def tts_openai_format(req: OpenAITTSRequest):
 
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
+
+@app.get("/v1/voices")
+def get_available_voices():
+    """
+    Returns a list of available voices.
+    """
+    return {
+        "voices": list(friendly_model_names.keys())
+    }
+@app.get("/v1/voices/{voice_id}/speakers")
+def get_speakers(voice_id: str):
+    """
+    Returns a list of available speakers for a given voice.
+    """
+    try:
+        speakers = get_available_speakers(voice_id)
+        return {"num_speakers": speakers}
+    except ValueError as e:
+        raise HTTPException(status_code=404, detail=str(e))
+        return {"num_speakers": 1} 

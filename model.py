@@ -458,3 +458,12 @@ english_models = {
     repo_id: _get_vits_piper
     for repo_id in friendly_model_names.values()
 }
+
+def get_available_speakers(id) -> list[str]:
+    """Return a list of available speakers."""
+    speakers = friendly_model_names.get(id, None)
+    if speakers is None:
+        raise ValueError(f"Unknown model ID: {id}")
+    num_speakers = speakers.split("|")[-1].strip()
+
+    return num_speakers.split(" ")[0].split("_")[0]
